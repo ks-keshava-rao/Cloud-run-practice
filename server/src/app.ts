@@ -3,7 +3,7 @@ import cors from 'cors';
 import { randomUUID } from 'crypto';
 
 const app = express();
-const PORT = 5000;
+const PORT = 3000;
 
 app.use(cors());
 app.use(express.json());
