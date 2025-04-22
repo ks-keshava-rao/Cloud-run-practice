@@ -13,15 +13,18 @@ COPY . .
 RUN pnpm install --force
 RUN pnpm run build
 
-# Stage 2: Serve with Nginx
-FROM nginx:alpine
+# Stage 2: Serve with "serve"
+FROM node:18-alpine
 
-# Remove default site
-RUN rm -rf /usr/share/nginx/html/*
+WORKDIR /app
 
-# Copy build output
-COPY --from=builder /app/dist /usr/share/nginx/html
+# Install serve
+RUN npm install -g serve
 
-EXPOSE 80
+# Copy build output from previous stage
+COPY --from=builder /app/dist /app/dist
 
-CMD ["nginx", "-g", "daemon off;"]
+EXPOSE 8080
+
+# Use serve to serve the static files on port 8080
+CMD ["serve", "-s", "dist", "-l", "8080"]
