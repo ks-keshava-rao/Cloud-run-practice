@@ -9,7 +9,7 @@ resource "google_cloud_run_service" "server" {
   template {
     spec {
       containers {
-        image = "${var.region}-docker.pkg.dev/${var.project_id}/${var.repo}/keshav-notes-backend:latest"
+        image = "${var.region}-docker.pkg.dev/${var.project_id}/${var.repo}/keshav-notes-terraform-backend:latest"
         ports {
           container_port = 3000
         }
@@ -30,12 +30,12 @@ resource "google_cloud_run_service" "server" {
 }
 
 resource "google_cloud_run_service" "client" {
-  name = "keshav-notes-terraform-frontend"
+  name     = "keshav-notes-terraform-frontend"
   location = var.region
   template {
     spec {
       containers {
-        image = "${var.region}-docker.pkg.dev/${var.project_id}/${var.repo}/keshav-notes-frontend:latest"
+        image = "${var.region}-docker.pkg.dev/${var.project_id}/${var.repo}/keshav-notes-terraform-frontend:latest"
         ports {
           container_port = 8080
         }
@@ -50,7 +50,21 @@ resource "google_cloud_run_service" "client" {
     }
   }
   traffic {
-    percent = 100
-    latest_revision = true
+    percent          = 100
+    latest_revision  = true
   }
+}
+
+resource "google_cloud_run_service_iam_member" "backend_invoker" {
+  location = google_cloud_run_service.server.location
+  service  = google_cloud_run_service.server.name
+  role     = "roles/run.invoker"
+  member   = "allUsers"
+}
+
+resource "google_cloud_run_service_iam_member" "frontend_invoker" {
+  location = google_cloud_run_service.client.location
+  service  = google_cloud_run_service.client.name
+  role     = "roles/run.invoker"
+  member   = "allUsers"
 }
